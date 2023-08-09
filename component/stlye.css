@@ -1,0 +1,92 @@
+.table-container {
+    padding: 100px
+}
+
+/* CustomColumns.module.css */
+.columnContainer {
+    display: flex;
+    align-items: center;
+}
+
+.plusIcon {
+    cursor: pointer;
+    margin-left: 8px;
+    font-size: 16px;
+}
+
+.center-align {
+    text-align: center;
+}
+
+/* Center-align text in table headers (titles) */
+.ant-table-thead th {
+    text-align: center !important;
+}
+
+/* Center-align text in table cells */
+.ant-table-tbody td {
+    text-align: center !important;
+}
+
+
+/* styles.css */
+
+/* Input styles */
+.input-container {
+    display: flex;
+    align-items: center;
+    background-color: #f0f2f5;
+    padding: 8px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+.input-container input {
+    flex: 1;
+    border: none;
+    background-color: transparent;
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.3s ease-in-out;
+    padding-right: 40px;
+}
+
+.input-container input:focus {
+    border-color: #3498db;
+}
+.input-container input:hover {
+    background-color: #f7f9fc;
+}
+/* Table container */
+.table-container {
+    margin-top: 20px;
+}
+
+.input-container .search-icon,
+.input-container .clear-button {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+}
+
+.input-container .search-icon {
+    right: 10px;
+    color: #999;
+}
+
+.input-container .clear-button {
+    right: 20px;
+    color: #999;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.input-container input:not(:placeholder-shown) + .clear-button {
+    opacity: 1;
+}
+
+.input-container .clear-button:hover {
+    color: #e74c3c;
+}

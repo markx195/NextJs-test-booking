@@ -209,10 +209,6 @@ const CustomTable = () => {
                     onChange={handleSearchChange}
                 />
             </div>
-            <div className="button-container">
-                <Button onClick={handleLastWeek}>Last Week</Button>
-                <Button onClick={handleNextWeek}>Next Week</Button>
-            </div>
             <Modal
                 open={modalVisible}
                 title={`Select Time Range for ${selectedDay}`}
@@ -232,6 +228,10 @@ const CustomTable = () => {
                 />
             </Modal>
             <div className="table-container">
+                <div className="button-container">
+                    <Button onClick={handleLastWeek}>Last Week</Button>
+                    <Button onClick={handleNextWeek}>Next Week</Button>
+                </div>
                 <Table dataSource={tableData} columns={columns} rowKey="id"/>
             </div>
         </div>

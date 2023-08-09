@@ -3,16 +3,48 @@ import React, {useState} from 'react';
 import DataSource from './fakedata'
 import CustomColumns from "./customColumn"
 import {Table, Input, Button, Space, TimePicker, Checkbox, Col, Row, Modal} from 'antd';
-import {PlusOutlined} from '@ant-design/icons';
 import "./stlye.css"
 
 const CustomTable = () => {
     const [data, setData] = useState(DataSource);
     const [modalVisible, setModalVisible] = useState(false);
     const [selectedRow, setSelectedRow] = useState(null);
-    const [selectedTimeRange, setSelectedTimeRange] = useState({ day: null, timeRange: null });
+    const [selectedTimeRange, setSelectedTimeRange] = useState({day: null, timeRange: null});
     const [selectedDay, setSelectedDay] = useState(null);
     const [selectedTime, setSelectedTime] = useState({});
+    // Generate dates for the current week
+    const [startDate, setStartDate] = useState(new Date()); // Initialize with current date
+    const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+    const handleNextWeek = () => {
+        const newStartDate = new Date(startDate);
+        newStartDate.setDate(newStartDate.getDate() + 7); // Move to next week
+        setStartDate(newStartDate);
+    };
+
+    const handleLastWeek = () => {
+        const newStartDate = new Date(startDate);
+        newStartDate.setDate(newStartDate.getDate() - 7); // Move to last week
+        setStartDate(newStartDate);
+    };
+
+    // Calculate the starting date of the displayed week
+    const currentDayIndex = startDate.getDay();
+    const displayStartDate = new Date(startDate);
+    displayStartDate.setDate(displayStartDate.getDate() - currentDayIndex + 1);
+
+    const dateCells = daysOfWeek.map((day, index) => {
+        const date = new Date(displayStartDate);
+        date.setDate(date.getDate() + index);
+
+        return (
+            <div key={day} className="date-cell">
+                <div className="day">{day}</div>
+                <div className="date">{date.toLocaleDateString()}</div>
+            </div>
+        );
+    });
+
     function timeToMinutes(timeString) {
         if (!timeString || typeof timeString !== 'string') {
             return 0;
@@ -32,6 +64,7 @@ const CustomTable = () => {
 
         return hours * 60 + minutes;
     }
+
     function calculateTotalTime(row) {
         const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
         const minutesInHour = 60; // Number of minutes in an hour
@@ -52,7 +85,7 @@ const CustomTable = () => {
         setSelectedRow(rowId);
         setSelectedDay(day);
         setModalVisible(true);
-        setSelectedTime({ [day]: selectedTimeRange }); // Update selected time for the specific day
+        setSelectedTime({[day]: selectedTimeRange}); // Update selected time for the specific day
     };
     const handleRowCheck = (id) => {
         const newData = data.map((row) => {
@@ -76,7 +109,7 @@ const CustomTable = () => {
 
             const newData = data.map((row) => {
                 if (row.id === selectedRow) {
-                    const updatedRow = { ...row };
+                    const updatedRow = {...row};
                     updatedRow[`${selectedDay}Time`] = formattedTimeRange;
                     return updatedRow;
                 }
@@ -106,7 +139,7 @@ const CustomTable = () => {
             title: "All",
             dataIndex: 'checkbox',
             render: (_, record) => (
-                <Checkbox checked={record.checked} onChange={() => handleRowCheck(record.id)} />
+                <Checkbox checked={record.checked} onChange={() => handleRowCheck(record.id)}/>
             ),
         },
         {
@@ -115,104 +148,34 @@ const CustomTable = () => {
             className: "center-align",
         },
         // Create separate rows for the plus icons and time pickers
-        {
-            title: 'Monday',
-            dataIndex: 'mondayTime',
+        ...dateCells.map((dateCell, index) => ({
+            title: dateCell,
+            dataIndex: 'days',
             className: "center-align",
-            render: (_, record) => (
-                <CustomColumns
-                    record={record}
-                    day="monday"
-                    handlePlusClick={handlePlusClick}
-                    selectedTimeRange={selectedTimeRange} // Pass the selectedTimeRange to the component
-                />
-            ),
-        },
-        {
-            title: 'Tuesday',
-            dataIndex: 'tuesdayTime',
-            className: "center-align",
-            render: (_, record) => (
-                <CustomColumns
-                    record={record}
-                    day="tuesday"
-                    handlePlusClick={handlePlusClick}
-                    selectedTime={selectedTimeRange}
-                />
-            ),
-        },
-        {
-            title: 'Wednesday',
-            dataIndex: 'wednesdayTime',
-            className: "center-align",
-            render: (_, record) => (
-                <CustomColumns
-                    record={record}
-                    day="wednesday"
-                    handlePlusClick={handlePlusClick}
-                    selectedTimeRange={selectedTimeRange} // Pass the selectedTimeRange to the component
-                />
-            ),
-        },
-        {
-            title: 'Thursday',
-            dataIndex: 'thursdayTime',
-            className: "center-align",
-            render: (_, record) => (
-                <CustomColumns
-                    record={record}
-                    day="thursday"
-                    handlePlusClick={handlePlusClick}
-                    selectedTimeRange={selectedTimeRange} // Pass the selectedTimeRange to the component
-                />
-            ),
-        },
-        {
-            title: 'Friday',
-            dataIndex: 'fridayTime',
-            className: "center-align",
-            render: (_, record) => (
-                <CustomColumns
-                    record={record}
-                    day="friday"
-                    handlePlusClick={handlePlusClick}
-                    selectedTimeRange={selectedTimeRange} // Pass the selectedTimeRange to the component
-                />
-            ),
-        },
-        {
-            title: 'Saturday',
-            dataIndex: 'saturdayTime',
-            className: "center-align",
-            render: (_, record) => (
-                <CustomColumns
-                    record={record}
-                    day="saturday"
-                    handlePlusClick={handlePlusClick}
-                    selectedTimeRange={selectedTimeRange} // Pass the selectedTimeRange to the component
-                />
-            ),
-        },
-        {
-            title: 'Sunday',
-            dataIndex: 'sundayTime',
-            className: "center-align",
-            render: (_, record) => (
-                <CustomColumns
-                    record={record}
-                    day="sunday"
-                    handlePlusClick={handlePlusClick}
-                    selectedTimeRange={selectedTimeRange} // Pass the selectedTimeRange to the component
-                />
-            ),
-        },
-        // Repeat for other days
+            render: (days, record) => {
+                const day = daysOfWeek[index].toLowerCase();
+                const dayData = days?.find(d => d.day === day);
+                const time = dayData?.time;
+
+                return (
+                    <CustomColumns
+                        record={record}
+                        day={day}
+                        date={dateCell}
+                        time={time}
+                        handlePlusClick={handlePlusClick}
+                        selectedTimeRange={selectedTimeRange}
+                    />
+                );
+            }
+        })),
         {
             title: 'Total',
             className: "center-align",
             dataIndex: 'total',
             render: (_, record) => <span>{calculateTotalTime(record)}</span>,
         },
+
     ];
 
     const handleTimeChange = (id, day, time) => {
@@ -245,6 +208,10 @@ const CustomTable = () => {
                     value={searchQuery}
                     onChange={handleSearchChange}
                 />
+            </div>
+            <div className="button-container">
+                <Button onClick={handleLastWeek}>Last Week</Button>
+                <Button onClick={handleNextWeek}>Next Week</Button>
             </div>
             <Modal
                 open={modalVisible}

@@ -1,27 +1,25 @@
-import React, {useState} from 'react';
+import React from 'react';
 import { PlusOutlined } from '@ant-design/icons';
-import {TimePicker} from "antd"; // Import the moment library
+import { TimePicker } from "antd";
 
-const CustomColumns = ({ record, day, handlePlusClick, selectedTimeRange }) => {
-    const time = record[`${day}Time`];
+const CustomColumns = ({ record, day, handlePlusClick }) => {
+    const dayData = record.days.find(d => d.day === day);
+    const time = dayData ? dayData.time : null;
 
     const handleTimeClick = () => {
-        if (time && Array.isArray(time) && time.length === 2) {
-            // If time range is present, show modal to edit it
+        if (!time || !time.length) {
             handlePlusClick(record.id, day);
         }
     };
 
     const renderTime = () => {
-        if (time && Array.isArray(time) && time.length === 2) {
+        if (time && time.length === 2) {
             return (
-                <span onClick={handleTimeClick}>
-                    {time[0]} - {time[1]}
-                </span>
+                <span>{time[0]} - {time[1]}</span>
             );
         } else {
             return (
-                <span onClick={() => handlePlusClick(record.id, day)}>
+                <span onClick={handleTimeClick}>
                     <PlusOutlined className="plus-icon" />
                 </span>
             );
@@ -32,5 +30,3 @@ const CustomColumns = ({ record, day, handlePlusClick, selectedTimeRange }) => {
 };
 
 export default CustomColumns;
-
-

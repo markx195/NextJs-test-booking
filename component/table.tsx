@@ -1,5 +1,5 @@
 "use client";
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import DataSource from './fakedata'
 import CustomColumns from "./customColumn"
 import {Table, Input, Button, Space, TimePicker, Checkbox, Col, Row, Modal} from 'antd';
@@ -15,6 +15,12 @@ const CustomTable = () => {
     // Generate dates for the current week
     const [startDate, setStartDate] = useState(new Date()); // Initialize with current date
     const daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+    useEffect(() => {
+        const savedData = localStorage.getItem('tableData');
+        if (savedData) {
+            setData(JSON.parse(savedData));
+        }
+    }, []);
 
     const handleNextWeek = () => {
         const newStartDate = new Date(startDate);
@@ -99,7 +105,6 @@ const CustomTable = () => {
         });
         setData(newData);
     };
-
     const handleModalOk = (timeRange) => {
         if (timeRange && timeRange.length === 2) {
             const formattedTimeRange = [
@@ -109,24 +114,27 @@ const CustomTable = () => {
 
             const newData = data.map((row) => {
                 if (row.id === selectedRow) {
-                    const updatedRow = {...row};
-                    updatedRow[`${selectedDay}Time`] = formattedTimeRange;
+                    const updatedRow = { ...row };
+                    const dayToUpdateIndex = updatedRow.days.findIndex(day => day.day === selectedDay);
+
+                    if (dayToUpdateIndex !== -1) {
+                        updatedRow.days[dayToUpdateIndex].time = formattedTimeRange;
+                    }
+
                     return updatedRow;
                 }
                 return row;
             });
 
             setData(newData);
-            setSelectedTimeRange({
-                day: selectedDay,
-                timeRange: formattedTimeRange
-            });
             setModalVisible(false);
+
+            // Save the updated data to localStorage
+            localStorage.setItem('tableData', JSON.stringify(newData));
         } else {
             console.error('Invalid time range format:', timeRange);
         }
     };
-
 
     const handleModalCancel = () => {
         setModalVisible(false);
@@ -160,9 +168,10 @@ const CustomTable = () => {
                 return (
                     <CustomColumns
                         record={record}
-                        day={day}
-                        date={dateCell}
-                        time={time}
+                        day={day.toLowerCase()}
+                        days={record.days} // Pass the array of days
+                        date={dayData.date}
+                        time={dayData.time}
                         handlePlusClick={handlePlusClick}
                         selectedTimeRange={selectedTimeRange}
                     />
@@ -178,25 +187,13 @@ const CustomTable = () => {
 
     ];
 
-    const handleTimeChange = (id, day, time) => {
-        const newData = data.map((row) => {
-            if (row.id === id) {
-                const updatedRow = {...row};
-                updatedRow[`${day}Time`] = time;
-                return updatedRow;
-            }
-            return row;
-        });
-        setData(newData);
-    };
-
     //// For Searching:
     const [searchQuery, setSearchQuery] = useState('');
     const handleSearchChange = (e) => {
         setSearchQuery(e.target.value);
     };
     const filteredData = data.filter((item) =>
-        item.officeName.toLowerCase().includes(searchQuery.toLowerCase())
+        item?.officeName?.toLowerCase().includes(searchQuery.toLowerCase())
     );
     const tableData = searchQuery.length > 0 ? filteredData : data;
 
